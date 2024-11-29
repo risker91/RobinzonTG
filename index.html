@@ -90,7 +90,7 @@
                 if (!response.ok) {
                     throw new Error('Ошибка сервера: ' + response.status);
                 }
-                updateDebugInfo2(response.status)
+
 
                 // Парсим JSON-ответ
                 const character = await response.json();
@@ -109,6 +109,7 @@
                 updateDebugInfo('Данные успешно загружены с сервера.');
             } catch (error) {
                 updateDebugInfo('Ошибка загрузки данных: ' + error.message);
+                updateDebugInfo2(error.stack);
             }
         }
 

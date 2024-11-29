@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Character Screen</title>
+    <title>Telegram Web App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,18 +67,27 @@
         // Функция обновления отладочной информации
         function updateDebugInfo(message) {
             const debugElement = document.getElementById("debugInfo");
-            debugElement.innerText = 'Отладочная информация: ${message}';
+            debugElement.innerText = `Отладочная информация: ${message}`;
         }
 
         // Проверка и вывод информации из Telegram Web App API
         try {
             if (tg && tg.initDataUnsafe) {
-                updateDebugInfo('Telegram API инициализирован! Данные: ${JSON.stringify(tg.initDataUnsafe)}');
+                // Если API доступен, выводим данные о пользователе
+                const user = tg.initDataUnsafe.user || {};
+                const userInfo = `
+ID: ${user.id || "неизвестен"},
+Имя: ${user.first_name || "неизвестно"},
+Пользователь: ${user.username || "неизвестно"}
+                `;
+                updateDebugInfo(`Telegram API инициализирован! Данные пользователя: ${userInfo}`);
             } else {
-                updateDebugInfo("Telegram Web App API не доступен. Проверьте настройки.");
+                // Если API не доступен
+                updateDebugInfo("Telegram Web App API не доступен. Возможно, вы не запустили приложение через Telegram.");
             }
         } catch (error) {
-            updateDebugInfo('Ошибка при инициализации Telegram API: ${error.message}');
+            // Если произошла ошибка
+            updateDebugInfo(`Ошибка при инициализации Telegram API: ${error.message}`);
         }
 
         // Функция для отображения данных персонажа

@@ -27,6 +27,14 @@
             width: 100%;
             height: 20px;
         }
+        .debug {
+            margin-top: 20px;
+            color: #888;
+            font-size: 14px;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -45,25 +53,34 @@
         <p><strong>Безопасность:</strong></p>
         <progress id="securityBar" value="0" max="10"></progress>
         <span id="securityValue">0</span>
+
+        <!-- Отладочная информация -->
+        <div class="debug" id="debugInfo">Отладочная информация: инициализация...</div>
     </div>
 
     <script>
         // Telegram Web App API
         const tg = window.Telegram.WebApp;
 
-        // Отладка: проверяем, доступен ли WebApp API
-        if (tg.initDataUnsafe) {
-            alert(`Telegram API инициализирован! Данные:\n${JSON.stringify(tg.initDataUnsafe)}`);
-        } else {
-            alert("Telegram Web App API не инициализирован. Проверьте настройки.");
+        // Функция обновления отладочной информации
+        function updateDebugInfo(message) {
+            const debugElement = document.getElementById("debugInfo");
+            debugElement.innerText = 'Отладочная информация: ${message}';
+        }
+
+        // Проверка и вывод информации из Telegram Web App API
+        try {
+            if (tg && tg.initDataUnsafe) {
+                updateDebugInfo('Telegram API инициализирован! Данные: ${JSON.stringify(tg.initDataUnsafe)}');
+            } else {
+                updateDebugInfo("Telegram Web App API не доступен. Проверьте настройки.");
+            }
+        } catch (error) {
+            updateDebugInfo('Ошибка при инициализации Telegram API: ${error.message}');
         }
 
         // Функция для отображения данных персонажа
         function loadCharacter() {
-            const userId = tg.initDataUnsafe?.user?.id || "guest"; // Получаем ID пользователя или задаём "гость"
-
-            alert(`Загружаем данные для пользователя с ID: ${userId}`);
-
             // Параметры персонажа (по умолчанию, если нет данных)
             const character = {
                 name: "Робинзон Крузо",

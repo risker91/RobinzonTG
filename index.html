@@ -59,7 +59,7 @@
         <!-- Отладочная информация -->
         <div class="debug" id="debugInfo">Отладочная информация: инициализация...</div>
 
-        <div class="debugUserName" id="debugInfoUserName">Отладочная информация: инициализация...</div>
+        <div class="debug" id="debugInfoUserName">Отладочная информация: инициализация...</div>
     </div>
 
     <script>
@@ -117,7 +117,7 @@
                 // Telegram API доступен, используем user.id для запроса
                 const userId = tg.initDataUnsafe.user?.id || 'guest';
                 updateDebugInfo('Telegram API инициализирован! Загрузка данных для пользователя ID: ' + userId);
-                updateDebugInfo2(userId);
+                updateDebugInfo2('vot: '+userId);
                 // Загружаем данные персонажа с сервера
                 loadCharacterFromServer(userId);
             } else {

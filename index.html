@@ -78,45 +78,42 @@
         }
 
         // Функция загрузки данных с вашего API
-       async function loadCharacterFromServer(userId) {
-    try {
-        const apiUrl = 'https://8103-92-246-201-83.ngrok-free.app/api/character/' + userId;
+        async function loadCharacterFromServer(userId) {
+            try {
+                // URL вашего API
+                const apiUrl = 'https://8103-92-246-201-83.ngrok-free.app/api/%D1%81haracter/' + userId;
 
-        appendDebugInfo('URL запроса: ' + apiUrl);
+                // Отправляем запрос на сервер
+                const response = await fetch(apiUrl);
 
-        const response = await fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-                'ngrok-skip-browser-warning': 'true'
+                const textResponse = await response.text();
+                
+
+                // Проверяем успешность ответа
+                if (!response.ok) {
+                    throw new Error('Ошибка сервера: ' + response.status);
+                }
+
+
+                // Парсим JSON-ответ
+                const character = await response.json();
+
+                // Обновляем интерфейс
+                document.getElementById('characterName').innerText = character.name || 'Неизвестный персонаж';
+                document.getElementById('energyBar').value = character.energy;
+                document.getElementById('energyValue').innerText = character.energy;
+
+                document.getElementById('foodBar').value = character.food;
+                document.getElementById('foodValue').innerText = character.food;
+
+                document.getElementById('securityBar').value = character.security;
+                document.getElementById('securityValue').innerText = character.security;
+
+                updateDebugInfo('Данные успешно загружены с сервера.');
+            } catch (error) {
+                updateDebugInfo('Ошибка загрузки данных: ' + error.message);                
             }
-        });
-
-        appendDebugInfo('HTTP статус: ' + response.status);
-
-        const textResponse = await response.text();
-        appendDebugInfo('Ответ сервера: ' + textResponse);
-
-        if (!response.ok) {
-            throw new Error('Ошибка сервера: ' + response.status + '\nОтвет сервера: ' + textResponse);
         }
-
-        const character = JSON.parse(textResponse);
-
-        document.getElementById('characterName').innerText = character.name || 'Неизвестный персонаж';
-        document.getElementById('energyBar').value = character.energy;
-        document.getElementById('energyValue').innerText = character.energy;
-
-        document.getElementById('foodBar').value = character.food;
-        document.getElementById('foodValue').innerText = character.food;
-
-        document.getElementById('securityBar').value = character.security;
-        document.getElementById('securityValue').innerText = character.security;
-
-        appendDebugInfo('Данные успешно загружены с сервера.');
-    } catch (error) {
-        appendDebugInfo('Ошибка загрузки данных: ' + error.message);
-    }
-}
 
         // Проверяем Telegram API и загружаем данные
         try {

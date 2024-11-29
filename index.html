@@ -86,14 +86,11 @@
                 // Отправляем запрос на сервер
                 const response = await fetch(apiUrl);
 
-                const textResponse = await response.text();
-                
-
                 // Проверяем успешность ответа
                 if (!response.ok) {
                     throw new Error('Ошибка сервера: ' + response.status);
                 }
-
+                
 
                 // Парсим JSON-ответ
                 const character = await response.json();
@@ -111,7 +108,7 @@
 
                 updateDebugInfo('Данные успешно загружены с сервера.');
             } catch (error) {
-                updateDebugInfo('Ошибка загрузки данных: ' + error.message);                
+                updateDebugInfo('Ошибка загрузки данных: ' + error.message);
             }
         }
 

@@ -58,8 +58,6 @@
 
         <!-- Отладочная информация -->
         <div class="debug" id="debugInfo">Отладочная информация: инициализация...</div>
-
-        <div class="debug" id="debugInfoUserName">Отладочная информация: инициализация...</div>
     </div>
 
     <script>
@@ -69,11 +67,6 @@
         // Функция обновления отладочной информации
         function updateDebugInfo(message) {
             const debugElement = document.getElementById('debugInfo');
-            debugElement.innerText = 'Отладочная информация: ' + message;
-        }
-
-        function updateDebugInfo2(message) {
-            const debugElement = document.getElementById('debugInfoUserName');
             debugElement.innerText = 'Отладочная информация: ' + message;
         }
 
@@ -90,7 +83,6 @@
                 if (!response.ok) {
                     throw new Error('Ошибка сервера: ' + response.status);
                 }
-                
 
                 // Парсим JSON-ответ
                 const character = await response.json();
@@ -118,7 +110,7 @@
                 // Telegram API доступен, используем user.id для запроса
                 const userId = tg.initDataUnsafe.user?.id || 'guest';
                 updateDebugInfo('Telegram API инициализирован! Загрузка данных для пользователя ID: ' + userId);
-                updateDebugInfo2('vot: '+userId);
+                
                 // Загружаем данные персонажа с сервера
                 loadCharacterFromServer(userId);
             } else {

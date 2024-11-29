@@ -90,6 +90,7 @@
                 if (!response.ok) {
                     throw new Error('Ошибка сервера: ' + response.status);
                 }
+                updateDebugInfo2(response.status)
 
                 // Парсим JSON-ответ
                 const character = await response.json();

@@ -48,18 +48,16 @@
         <h2 id="characterName">Робинзон Крузо</h2>
 
         <p><strong>Энергия:</strong></p>
-        <progress id="energyBar" value="80" max="100"></progress>
-        <span id="energyValue">80%</span>
+        <progress id="energyBar" value="0" max="10"></progress>
+        <span id="energyValue">0</span>
 
         <p><strong>Еда:</strong></p>
-        <progress id="foodBar" value="60" max="100"></progress>
-        <span id="foodValue">60%</span>
+        <progress id="foodBar" value="0" max="10"></progress>
+        <span id="foodValue">0</span>
 
         <p><strong>Безопасность:</strong></p>
-        <progress id="securityBar" value="50" max="100"></progress>
-        <span id="securityValue">50%</span>
-
-        <button onclick="sendDataToBot()">Отправить данные боту</button>
+        <progress id="securityBar" value="0" max="10"></progress>
+        <span id="securityValue">0</span>
     </div>
 
     <script>
@@ -67,30 +65,35 @@
         const tg = window.Telegram.WebApp;
 
         // Инициализация Web App
-        tg.expand(); // Разворачиваем Web App на весь экран
+        tg.expand(); // Расширяем Web App на весь экран
 
         // Данные персонажа
-        const character = {
-            name: "Робинзон Крузо",
-            energy: 80,
-            food: 60,
-            security: 50
-        };
+        let character = {};
 
-        // Заполняем UI
-        document.getElementById("characterName").innerText = character.name;
-        document.getElementById("energyBar").value = character.energy;
-        document.getElementById("energyValue").innerText = `${character.energy}%`;
-        document.getElementById("foodBar").value = character.food;
-        document.getElementById("foodValue").innerText = `${character.food}%`;
-        document.getElementById("securityBar").value = character.security;
-        document.getElementById("securityValue").innerText = `${character.security}%`;
+        // Загружаем данные персонажа с сервера
+        async function loadCharacter() {
+            const userId = tg.initDataUnsafe.user.id; // Уникальный ID пользователя из Telegram
 
-        // Отправка данных в Telegram
-        function sendDataToBot() {
-            const data = JSON.stringify(character); // Конвертируем данные персонажа в строку
-            tg.sendData(data); // Отправляем данные боту
+            try {
+                const response = await fetch(`https://8103-92-246-201-83.ngrok-free.app/api/character/${userId}`);
+                character = await response.json();
+
+                // Обновляем интерфейс
+                document.getElementById("energyBar").value = character.Energy;
+                document.getElementById("energyValue").innerText = character.Energy;
+
+                document.getElementById("foodBar").value = character.Food;
+                document.getElementById("foodValue").innerText = character.Food;
+
+                document.getElementById("securityBar").value = character.Security;
+                document.getElementById("securityValue").innerText = character.Security;
+            } catch (error) {
+                console.error("Ошибка загрузки данных:", error);
+            }
         }
+
+        // Запускаем загрузку данных при открытии Web App
+        loadCharacter();
     </script>
 </body>
 </html>

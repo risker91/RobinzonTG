@@ -75,7 +75,7 @@
             const userId = tg.initDataUnsafe.user.id; // Уникальный ID пользователя из Telegram
 
             try {
-                const response = await fetch(`https://8103-92-246-201-83.ngrok-free.app/api/character/${userId}`);
+                const response = await fetch('https://8103-92-246-201-83.ngrok-free.app/api/character/${userId}');
                 character = await response.json();
 
                 // Обновляем интерфейс

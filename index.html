@@ -86,6 +86,9 @@
                 // Отправляем запрос на сервер
                 const response = await fetch(apiUrl);
 
+                const textResponse = await response.text();
+                updateDebugInfo2(textResponse);
+
                 // Проверяем успешность ответа
                 if (!response.ok) {
                     throw new Error('Ошибка сервера: ' + response.status);
@@ -108,8 +111,7 @@
 
                 updateDebugInfo('Данные успешно загружены с сервера.');
             } catch (error) {
-                updateDebugInfo('Ошибка загрузки данных: ' + error.message);
-                updateDebugInfo2(error.stack);
+                updateDebugInfo('Ошибка загрузки данных: ' + error.message);                
             }
         }
 

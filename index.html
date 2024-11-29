@@ -66,55 +66,60 @@
 
         // Функция обновления отладочной информации
         function updateDebugInfo(message) {
-            const debugElement = document.getElementById("debugInfo");
-            // Используем обратные кавычки для интерполяции
-            debugElement.innerText = `Отладочная информация: ${message}`;
+            const debugElement = document.getElementById('debugInfo');
+            debugElement.innerText = 'Отладочная информация: ' + message;
         }
 
-        // Проверка и вывод информации из Telegram Web App API
+        // Функция загрузки данных с вашего API
+        async function loadCharacterFromServer(userId) {
+            try {
+                // URL вашего API
+                const apiUrl = 'https://8103-92-246-201-83.ngrok-free.app/api/character/' + userId;
+
+                // Отправляем запрос на сервер
+                const response = await fetch(apiUrl);
+
+                // Проверяем успешность ответа
+                if (!response.ok) {
+                    throw new Error('Ошибка сервера: ' + response.status);
+                }
+
+                // Парсим JSON-ответ
+                const character = await response.json();
+
+                // Обновляем интерфейс
+                document.getElementById('characterName').innerText = character.name || 'Неизвестный персонаж';
+                document.getElementById('energyBar').value = character.energy;
+                document.getElementById('energyValue').innerText = character.energy;
+
+                document.getElementById('foodBar').value = character.food;
+                document.getElementById('foodValue').innerText = character.food;
+
+                document.getElementById('securityBar').value = character.security;
+                document.getElementById('securityValue').innerText = character.security;
+
+                updateDebugInfo('Данные успешно загружены с сервера.');
+            } catch (error) {
+                updateDebugInfo('Ошибка загрузки данных: ' + error.message);
+            }
+        }
+
+        // Проверяем Telegram API и загружаем данные
         try {
             if (tg && tg.initDataUnsafe) {
-                // Если API доступен, выводим данные о пользователе
-                const user = tg.initDataUnsafe.user || {};
-                const userInfo = `
-ID: ${user.id || "неизвестен"},
-Имя: ${user.first_name || "неизвестно"},
-Пользователь: ${user.username || "неизвестно"}
-                `;
-                updateDebugInfo(`Telegram API инициализирован! Данные пользователя: ${userInfo}`);
+                // Telegram API доступен, используем user.id для запроса
+                const userId = tg.initDataUnsafe.user?.id || 'guest';
+                updateDebugInfo('Telegram API инициализирован! Загрузка данных для пользователя ID: ' + userId);
+                
+                // Загружаем данные персонажа с сервера
+                loadCharacterFromServer(userId);
             } else {
-                // Если API не доступен
-                updateDebugInfo("Telegram Web App API не доступен. Возможно, вы не запустили приложение через Telegram.");
+                // Если Telegram API не доступен
+                updateDebugInfo('Telegram Web App API не доступен. Возможно, вы не запустили приложение через Telegram.');
             }
         } catch (error) {
-            // Если произошла ошибка
-            updateDebugInfo(`Ошибка при инициализации Telegram API: ${error.message}`);
+            updateDebugInfo('Ошибка при инициализации Telegram API: ' + error.message);
         }
-
-        // Функция для отображения данных персонажа
-        function loadCharacter() {
-            // Параметры персонажа (по умолчанию, если нет данных)
-            const character = {
-                name: "Робинзон Крузо",
-                energy: 3,
-                food: 3,
-                security: 3
-            };
-
-            // Обновляем интерфейс
-            document.getElementById("characterName").innerText = character.name;
-            document.getElementById("energyBar").value = character.energy;
-            document.getElementById("energyValue").innerText = character.energy;
-
-            document.getElementById("foodBar").value = character.food;
-            document.getElementById("foodValue").innerText = character.food;
-
-            document.getElementById("securityBar").value = character.security;
-            document.getElementById("securityValue").innerText = character.security;
-        }
-
-        // Загружаем данные при открытии Web App
-        loadCharacter();
     </script>
 </body>
 </html>

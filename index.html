@@ -27,25 +27,12 @@
             width: 100%;
             height: 20px;
         }
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Персонаж</h1>
-        <h2 id="characterName">Робинзон Крузо1</h2>
+        <h2 id="characterName">Загрузка...</h2>
 
         <p><strong>Энергия:</strong></p>
         <progress id="energyBar" value="0" max="10"></progress>
@@ -64,35 +51,40 @@
         // Telegram Web App API
         const tg = window.Telegram.WebApp;
 
-        // Инициализация Web App
-        tg.expand(); // Расширяем Web App на весь экран
-
-        // Данные персонажа
-        let character = {};
-
-        // Загружаем данные персонажа с сервера
-        async function loadCharacter() {
-            const userId = tg.initDataUnsafe.user.id; // Уникальный ID пользователя из Telegram
-
-            try {
-                const response = await fetch('https://8103-92-246-201-83.ngrok-free.app/api/character/${userId}');
-                character = await response.json();
-
-                // Обновляем интерфейс
-                document.getElementById("energyBar").value = character.Energy;
-                document.getElementById("energyValue").innerText = character.Energy;
-
-                document.getElementById("foodBar").value = character.Food;
-                document.getElementById("foodValue").innerText = character.Food;
-
-                document.getElementById("securityBar").value = character.Security;
-                document.getElementById("securityValue").innerText = character.Security;
-            } catch (error) {
-                console.error("Ошибка загрузки данных:", error);
-            }
+        // Отладка: проверяем, доступен ли WebApp API
+        if (tg.initDataUnsafe) {
+            alert(`Telegram API инициализирован! Данные:\n${JSON.stringify(tg.initDataUnsafe)}`);
+        } else {
+            alert("Telegram Web App API не инициализирован. Проверьте настройки.");
         }
 
-        // Запускаем загрузку данных при открытии Web App
+        // Функция для отображения данных персонажа
+        function loadCharacter() {
+            const userId = tg.initDataUnsafe?.user?.id || "guest"; // Получаем ID пользователя или задаём "гость"
+
+            alert(`Загружаем данные для пользователя с ID: ${userId}`);
+
+            // Параметры персонажа (по умолчанию, если нет данных)
+            const character = {
+                name: "Робинзон Крузо",
+                energy: 3,
+                food: 3,
+                security: 3
+            };
+
+            // Обновляем интерфейс
+            document.getElementById("characterName").innerText = character.name;
+            document.getElementById("energyBar").value = character.energy;
+            document.getElementById("energyValue").innerText = character.energy;
+
+            document.getElementById("foodBar").value = character.food;
+            document.getElementById("foodValue").innerText = character.food;
+
+            document.getElementById("securityBar").value = character.security;
+            document.getElementById("securityValue").innerText = character.security;
+        }
+
+        // Загружаем данные при открытии Web App
         loadCharacter();
     </script>
 </body>

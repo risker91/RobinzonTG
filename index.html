@@ -1,134 +1,24 @@
-<script>
-    // Параметры персонажа
-    const character = {
-        energy: 10,
-        food: 5,
-        security: 3
-    };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robinzon Game</title>
+</head>
+<body>
+    <h1>Robinzon Game</h1>
+    <div id="description">Загрузка...</div>
 
-    // Базовый URL API
-    const apiUrl = 'http://84.21.172.178:8080/api/game';
+    <h3>Параметры персонажа:</h3>
+    <ul>
+        <li>Энергия: <span id="energy">0</span></li>
+        <li>Еда: <span id="food">0</span></li>
+        <li>Безопасность: <span id="security">0</span></li>
+    </ul>
 
-    // Идентификатор пользователя (например, из Telegram WebApp API)
-    const userId = 'guest'; // Замените на ID пользователя из Telegram
+    <h3>Доступные действия:</h3>
+    <div id="actions"></div>
 
-    // Функция загрузки начального состояния
-    async function loadGameState() {
-        try {
-            // Выполняем HTTP POST запрос
-            const response = await fetch(`${apiUrl}/${userId}/play`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ actionNumber: null }) // Для начальной загрузки можно передать null
-            });
-
-            const data = await response.json();
-
-            // Обновляем текст описания
-            document.getElementById('description').innerText = data.text;
-
-            // Обновляем список действий
-            const actionsContainer = document.getElementById('actions');
-            actionsContainer.innerHTML = '';
-            data.actions.forEach(action => {
-                // Создаем кнопку действия
-                const button = document.createElement('button');
-                button.innerText = `Действие #${action.number}: ${action.text}`;
-                button.onclick = () => chooseAction(action.number);
-
-                // Создаем описание стоимости действия
-                const costDescription = document.createElement('div');
-                costDescription.className = 'action-cost';
-
-                if (action.cost && action.cost.length > 0) {
-                    const costs = action.cost.map(cost => {
-                        switch (cost.resource) {
-                            case 'Energy': return `Энергия: ${cost.value}`;
-                            case 'Food': return `Еда: ${cost.value}`;
-                            case 'Security': return `Безопасность: ${cost.value}`;
-                            default: return `${cost.resource}: ${cost.value}`;
-                        }
-                    });
-                    costDescription.innerText = costs.join(', ');
-                } else {
-                    costDescription.innerText = 'Без затрат.';
-                }
-
-                // Добавляем кнопку и описание в контейнер
-                const actionContainer = document.createElement('div');
-                actionContainer.appendChild(button);
-                actionContainer.appendChild(costDescription);
-                actionsContainer.appendChild(actionContainer);
-            });
-        } catch (error) {
-            console.error('Ошибка загрузки состояния игры:', error);
-            document.getElementById('description').innerText = 'Ошибка загрузки данных. Попробуйте обновить страницу.';
-        }
-    }
-
-    // Функция выбора действия
-    async function chooseAction(actionNumber) {
-        try {
-            // Выполняем HTTP POST запрос
-            const response = await fetch(`${apiUrl}/${userId}/play`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ actionNumber }) // Передаём номер действия
-            });
-            const result = await response.json();
-
-            // Обновляем текст описания
-            document.getElementById('description').innerText = result.text;
-
-            // Обновляем параметры персонажа
-            character.energy = result.energy;
-            character.food = result.food;
-            character.security = result.security;
-            updateStats();
-
-            // Обновляем список действий
-            const actionsContainer = document.getElementById('actions');
-            actionsContainer.innerHTML = '';
-            result.actions.forEach(action => {
-                const button = document.createElement('button');
-                button.innerText = `Действие #${action.number}: ${action.text}`;
-                button.onclick = () => chooseAction(action.number);
-
-                const costDescription = document.createElement('div');
-                costDescription.className = 'action-cost';
-
-                if (action.cost && action.cost.length > 0) {
-                    const costs = action.cost.map(cost => {
-                        switch (cost.resource) {
-                            case 'Energy': return `Энергия: ${cost.value}`;
-                            case 'Food': return `Еда: ${cost.value}`;
-                            case 'Security': return `Безопасность: ${cost.value}`;
-                            default: return `${cost.resource}: ${cost.value}`;
-                        }
-                    });
-                    costDescription.innerText = costs.join(', ');
-                } else {
-                    costDescription.innerText = 'Без затрат.';
-                }
-
-                const actionContainer = document.createElement('div');
-                actionContainer.appendChild(button);
-                actionContainer.appendChild(costDescription);
-                actionsContainer.appendChild(actionContainer);
-            });
-        } catch (error) {
-            console.error('Ошибка выполнения действия:', error);
-            document.getElementById('description').innerText = 'Ошибка выполнения действия. Попробуйте снова.';
-        }
-    }
-
-    // Функция обновления параметров
-    function updateStats() {
-        document.getElementById('energy').innerText = character.energy;
-        document.getElementById('food').innerText = character.food;
-        document.getElementById('security').innerText = character.security;
-    }
-
-    // Загружаем начальные данные при загрузке страницы
-    loadGameState();
-</script>
+    <script src="game.js"></script>
+</body>
+</html>

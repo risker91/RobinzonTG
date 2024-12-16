@@ -1,130 +1,134 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Web App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #333;
-        }
-        progress {
-            width: 100%;
-            height: 20px;
-        }
-        .debug {
-            margin-top: 20px;
-            color: #888;
-            font-size: 14px;
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 5px;
-        }
-    </style>
-    <!-- Подключение Telegram Web App SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-</head>
-<body>
-    <div class="container">
-        <h1>Персонаж</h1>
-        <h2 id="characterName">Загрузка...</h2>
+<script>
+    // Параметры персонажа
+    const character = {
+        energy: 10,
+        food: 5,
+        security: 3
+    };
 
-        <p><strong>Энергия:</strong></p>
-        <progress id="energyBar" value="0" max="10"></progress>
-        <span id="energyValue">0</span>
+    // Базовый URL API
+    const apiUrl = 'http://84.21.172.178:8080/api/game';
 
-        <p><strong>Еда:</strong></p>
-        <progress id="foodBar" value="0" max="10"></progress>
-        <span id="foodValue">0</span>
+    // Идентификатор пользователя (например, из Telegram WebApp API)
+    const userId = 'guest'; // Замените на ID пользователя из Telegram
 
-        <p><strong>Безопасность:</strong></p>
-        <progress id="securityBar" value="0" max="10"></progress>
-        <span id="securityValue">0</span>
+    // Функция загрузки начального состояния
+    async function loadGameState() {
+        try {
+            // Выполняем HTTP POST запрос
+            const response = await fetch(`${apiUrl}/${userId}/play`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ actionNumber: null }) // Для начальной загрузки можно передать null
+            });
 
-        <!-- Отладочная информация -->
-        <div class="debug" id="debugInfo">Отладочная информация: инициализация...</div>
-    </div>
+            const data = await response.json();
 
-    <script>
-        // Telegram Web App API
-        const tg = window.Telegram.WebApp;
+            // Обновляем текст описания
+            document.getElementById('description').innerText = data.text;
 
-        // Функция обновления отладочной информации
-        function updateDebugInfo(message) {
-            const debugElement = document.getElementById('debugInfo');
-            debugElement.innerText = 'Отладочная информация: ' + message;
-        }
+            // Обновляем список действий
+            const actionsContainer = document.getElementById('actions');
+            actionsContainer.innerHTML = '';
+            data.actions.forEach(action => {
+                // Создаем кнопку действия
+                const button = document.createElement('button');
+                button.innerText = `Действие #${action.number}: ${action.text}`;
+                button.onclick = () => chooseAction(action.number);
 
-        // Функция загрузки данных с вашего API
-        async function loadCharacterFromServer(userId) {
-            try {
-                // URL вашего API
-                const apiUrl = 'https://8103-92-246-201-83.ngrok-free.app/api/%D1%81haracter/' + userId;
+                // Создаем описание стоимости действия
+                const costDescription = document.createElement('div');
+                costDescription.className = 'action-cost';
 
-                // Отправляем запрос на сервер
-                const response = await fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-                'ngrok-skip-browser-warning': 'true'
-            }
-        });
-
-                // Проверяем успешность ответа
-                if (!response.ok) {
-                    throw new Error('Ошибка сервера: ' + response.status);
+                if (action.cost && action.cost.length > 0) {
+                    const costs = action.cost.map(cost => {
+                        switch (cost.resource) {
+                            case 'Energy': return `Энергия: ${cost.value}`;
+                            case 'Food': return `Еда: ${cost.value}`;
+                            case 'Security': return `Безопасность: ${cost.value}`;
+                            default: return `${cost.resource}: ${cost.value}`;
+                        }
+                    });
+                    costDescription.innerText = costs.join(', ');
+                } else {
+                    costDescription.innerText = 'Без затрат.';
                 }
 
-                // Парсим JSON-ответ
-                const character = await response.json();
-
-                // Обновляем интерфейс
-                document.getElementById('characterName').innerText = character.name || 'Неизвестный персонаж';
-                document.getElementById('energyBar').value = character.energy;
-                document.getElementById('energyValue').innerText = character.energy;
-
-                document.getElementById('foodBar').value = character.food;
-                document.getElementById('foodValue').innerText = character.food;
-
-                document.getElementById('securityBar').value = character.security;
-                document.getElementById('securityValue').innerText = character.security;
-
-                updateDebugInfo('Данные успешно загружены с сервера.');
-            } catch (error) {
-                updateDebugInfo('Ошибка загрузки данных: ' + error.message);
-            }
-        }
-
-        // Проверяем Telegram API и загружаем данные
-        try {
-            if (tg && tg.initDataUnsafe) {
-                // Telegram API доступен, используем user.id для запроса
-                const userId = tg.initDataUnsafe.user?.id || 'guest';
-                updateDebugInfo('Telegram API инициализирован! Загрузка данных для пользователя ID: ' + userId);
-                
-                // Загружаем данные персонажа с сервера
-                loadCharacterFromServer(userId);
-            } else {
-                // Если Telegram API не доступен
-                updateDebugInfo('Telegram Web App API не доступен. Возможно, вы не запустили приложение через Telegram.');
-            }
+                // Добавляем кнопку и описание в контейнер
+                const actionContainer = document.createElement('div');
+                actionContainer.appendChild(button);
+                actionContainer.appendChild(costDescription);
+                actionsContainer.appendChild(actionContainer);
+            });
         } catch (error) {
-            updateDebugInfo('Ошибка при инициализации Telegram API: ' + error.message);
+            console.error('Ошибка загрузки состояния игры:', error);
+            document.getElementById('description').innerText = 'Ошибка загрузки данных. Попробуйте обновить страницу.';
         }
-    </script>
-</body>
-</html>
+    }
+
+    // Функция выбора действия
+    async function chooseAction(actionNumber) {
+        try {
+            // Выполняем HTTP POST запрос
+            const response = await fetch(`${apiUrl}/${userId}/play`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ actionNumber }) // Передаём номер действия
+            });
+            const result = await response.json();
+
+            // Обновляем текст описания
+            document.getElementById('description').innerText = result.text;
+
+            // Обновляем параметры персонажа
+            character.energy = result.energy;
+            character.food = result.food;
+            character.security = result.security;
+            updateStats();
+
+            // Обновляем список действий
+            const actionsContainer = document.getElementById('actions');
+            actionsContainer.innerHTML = '';
+            result.actions.forEach(action => {
+                const button = document.createElement('button');
+                button.innerText = `Действие #${action.number}: ${action.text}`;
+                button.onclick = () => chooseAction(action.number);
+
+                const costDescription = document.createElement('div');
+                costDescription.className = 'action-cost';
+
+                if (action.cost && action.cost.length > 0) {
+                    const costs = action.cost.map(cost => {
+                        switch (cost.resource) {
+                            case 'Energy': return `Энергия: ${cost.value}`;
+                            case 'Food': return `Еда: ${cost.value}`;
+                            case 'Security': return `Безопасность: ${cost.value}`;
+                            default: return `${cost.resource}: ${cost.value}`;
+                        }
+                    });
+                    costDescription.innerText = costs.join(', ');
+                } else {
+                    costDescription.innerText = 'Без затрат.';
+                }
+
+                const actionContainer = document.createElement('div');
+                actionContainer.appendChild(button);
+                actionContainer.appendChild(costDescription);
+                actionsContainer.appendChild(actionContainer);
+            });
+        } catch (error) {
+            console.error('Ошибка выполнения действия:', error);
+            document.getElementById('description').innerText = 'Ошибка выполнения действия. Попробуйте снова.';
+        }
+    }
+
+    // Функция обновления параметров
+    function updateStats() {
+        document.getElementById('energy').innerText = character.energy;
+        document.getElementById('food').innerText = character.food;
+        document.getElementById('security').innerText = character.security;
+    }
+
+    // Загружаем начальные данные при загрузке страницы
+    loadGameState();
+</script>
